@@ -35,6 +35,9 @@
             this.buttonDownLoad = new System.Windows.Forms.Button();
             this.richTextBoxHtml = new System.Windows.Forms.RichTextBox();
             this.buttonSinglePage = new System.Windows.Forms.Button();
+            this.buttonInfo = new System.Windows.Forms.Button();
+            this.buttonBanner = new System.Windows.Forms.Button();
+            this.buttonAll = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBoxUrl
@@ -46,7 +49,7 @@
             // 
             // buttonTest
             // 
-            this.buttonTest.Location = new System.Drawing.Point(713, 131);
+            this.buttonTest.Location = new System.Drawing.Point(713, 72);
             this.buttonTest.Name = "buttonTest";
             this.buttonTest.Size = new System.Drawing.Size(75, 23);
             this.buttonTest.TabIndex = 1;
@@ -99,11 +102,44 @@
             this.buttonSinglePage.UseVisualStyleBackColor = true;
             this.buttonSinglePage.Click += new System.EventHandler(this.buttonSinglePage_Click);
             // 
+            // buttonInfo
+            // 
+            this.buttonInfo.Location = new System.Drawing.Point(713, 349);
+            this.buttonInfo.Name = "buttonInfo";
+            this.buttonInfo.Size = new System.Drawing.Size(75, 23);
+            this.buttonInfo.TabIndex = 7;
+            this.buttonInfo.Text = "生成info";
+            this.buttonInfo.UseVisualStyleBackColor = true;
+            this.buttonInfo.Click += new System.EventHandler(this.buttonInfo_Click);
+            // 
+            // buttonBanner
+            // 
+            this.buttonBanner.Location = new System.Drawing.Point(713, 397);
+            this.buttonBanner.Name = "buttonBanner";
+            this.buttonBanner.Size = new System.Drawing.Size(75, 23);
+            this.buttonBanner.TabIndex = 8;
+            this.buttonBanner.Text = "下载banner";
+            this.buttonBanner.UseVisualStyleBackColor = true;
+            this.buttonBanner.Click += new System.EventHandler(this.buttonBanner_Click);
+            // 
+            // buttonAll
+            // 
+            this.buttonAll.Location = new System.Drawing.Point(713, 122);
+            this.buttonAll.Name = "buttonAll";
+            this.buttonAll.Size = new System.Drawing.Size(75, 23);
+            this.buttonAll.TabIndex = 9;
+            this.buttonAll.Text = "下载全部";
+            this.buttonAll.UseVisualStyleBackColor = true;
+            this.buttonAll.Click += new System.EventHandler(this.buttonAll_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 450);
+            this.Controls.Add(this.buttonAll);
+            this.Controls.Add(this.buttonBanner);
+            this.Controls.Add(this.buttonInfo);
             this.Controls.Add(this.buttonSinglePage);
             this.Controls.Add(this.richTextBoxHtml);
             this.Controls.Add(this.buttonDownLoad);
@@ -128,6 +164,9 @@
         private System.Windows.Forms.Button buttonDownLoad;
         private System.Windows.Forms.RichTextBox richTextBoxHtml;
         private System.Windows.Forms.Button buttonSinglePage;
+        private System.Windows.Forms.Button buttonInfo;
+        private System.Windows.Forms.Button buttonBanner;
+        private System.Windows.Forms.Button buttonAll;
     }
 }
 

@@ -18,6 +18,8 @@ namespace website
         //漫画名称
         protected string name;
         protected string poster;
+        protected string route;
+        protected string infoRoute;
         //漫画主页链接
         protected string url;
         //漫画网站用户标识
@@ -32,6 +34,7 @@ namespace website
         protected string webSiteDomain;
         //漫画下载路径
         protected string downloadRoute;
+        protected int numberSuffix=1;
         //章节合集
         public List<ChapterItem> chapters = new List<ChapterItem>();
 
@@ -48,6 +51,7 @@ namespace website
         protected void init()
         {
             string route = global.downloadRoute + "\\" + this.webSiteName + "\\";
+            this.route = route;
             //设置网站标识
             global.website = this.webSiteMark;
             //获取漫画主页数据
@@ -60,22 +64,20 @@ namespace website
             this.poster = this.get_manga_poster(this.html);
             //构建下载路径
             this.downloadRoute = route + this.name + "\\";
-            
+            this.infoRoute = this.route + this.name + "-smanga-info\\";
+
             //获取所有页码页面
             this.chapterPages = this.get_chapter_pages(this.html);
             //获取所有章节链接
             this.chapterPages.ForEach((string i) => { this.chapterInfos = chapterInfos.Union(this.get_chapter_info(i)).ToList(); });
             //获取章节图片
-            this.chapterInfos.ForEach((string i) => { this.chapters.Add(this.get_chapter_images(i)); });
+            this.chapterInfos.ForEach((string i) => { 
+                this.chapters.Add(this.get_chapter_images(i)); });
+        }
 
-            if (this.downloadSwitch)
-            {
-                //下载漫画封面
-                this.download_manga_poster(route, this.name, this.poster);
-                //下载章节图片
-                this.chapters.ForEach((ChapterItem i) => { this.download_chapter_images(i); });
-            }
-            
+        public void download_chapter_poster() {
+            //下载章节图片
+            this.chapters.ForEach((ChapterItem i) => { this.download_chapter_images(i); });
         }
 
         /// <summary>
@@ -211,7 +213,8 @@ namespace website
         protected void download_manga_poster(string route, string name, string poster)
         {
             //下载图片
-            download_image_by_http(poster, route + name + ".jpg");
+            string suffix = this.get_image_suffix(poster);
+            download_image_by_http(poster, route + name + suffix);
         }
         /// <summary>
         /// 根据链接获取页面html代码-使用请求
@@ -393,6 +396,38 @@ namespace website
             this.subName = subName;
             this.suffix = suffix;
             this.images = images;
+        }
+    }
+
+    public class MangaInfo
+    {
+        public string title;
+        public string author;
+        public string star;
+        public string describe;
+        public List<string> tags;
+        public string publishDate;
+        public List<Character> character;
+
+        public MangaInfo(string title, string author, string star, string describe, List<string> tags, string publishDate)
+        {
+            this.title = title;
+            this.author = author;
+            this.star = star;
+            this.describe = describe;
+            this.tags = tags;
+            this.publishDate = publishDate;
+        }
+    }
+    public class Character
+    {
+        public string name;
+        public string description;
+
+        public Character(string name, string description)
+        {
+            this.name = name;
+            this.description = description;
         }
     }
 }
