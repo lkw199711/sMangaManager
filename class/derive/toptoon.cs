@@ -284,11 +284,29 @@ namespace website
 
         public void download_manga_info_poster()
         {
+            string smangaPath = this.route + this.name + "-smanga-info";
+
             this.download_banner(this.html);
             this.download_thumbnail(this.html);
             this.download_character(this.html);
             //下载漫画封面
             download_image_by_http(this.poster, this.infoRoute + "cover"+ this.get_image_suffix(this.poster));
+
+            delete(smangaPath + "\\temp");
+        }
+
+        /// <summary>
+        /// 删除文件或目录
+        /// </summary>
+        /// <param name="fileName">文件路径</param>
+        public void delete(string fileName)
+        {
+            // 如果是目录,调用文件夹方法
+            if (Directory.Exists(fileName)) Directory.Delete(fileName, true);
+
+            // 如果是文件,调用文件方法
+            if (File.Exists(fileName)) File.Delete(fileName);
+
         }
 
         public void set_info()

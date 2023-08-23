@@ -78,6 +78,22 @@ namespace website
         public void download_chapter_poster() {
             //下载章节图片
             this.chapters.ForEach((ChapterItem i) => { this.download_chapter_images(i); });
+
+            delete(this.downloadRoute + "\\temp");
+        }
+
+        /// <summary>
+        /// 删除文件或目录
+        /// </summary>
+        /// <param name="fileName">文件路径</param>
+        public void delete(string fileName)
+        {
+            // 如果是目录,调用文件夹方法
+            if (Directory.Exists(fileName)) Directory.Delete(fileName, true);
+
+            // 如果是文件,调用文件方法
+            if (File.Exists(fileName)) File.Delete(fileName);
+
         }
 
         /// <summary>

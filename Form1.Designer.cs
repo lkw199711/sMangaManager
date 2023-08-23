@@ -38,6 +38,7 @@
             this.buttonInfo = new System.Windows.Forms.Button();
             this.buttonBanner = new System.Windows.Forms.Button();
             this.buttonAll = new System.Windows.Forms.Button();
+            this.buttonNoCookie = new System.Windows.Forms.Button();
             this.SuspendLayout();
             // 
             // textBoxUrl
@@ -49,7 +50,7 @@
             // 
             // buttonTest
             // 
-            this.buttonTest.Location = new System.Drawing.Point(713, 72);
+            this.buttonTest.Location = new System.Drawing.Point(713, 22);
             this.buttonTest.Name = "buttonTest";
             this.buttonTest.Size = new System.Drawing.Size(75, 23);
             this.buttonTest.TabIndex = 1;
@@ -66,7 +67,7 @@
             // 
             // buttonReName
             // 
-            this.buttonReName.Location = new System.Drawing.Point(713, 180);
+            this.buttonReName.Location = new System.Drawing.Point(713, 108);
             this.buttonReName.Name = "buttonReName";
             this.buttonReName.Size = new System.Drawing.Size(75, 23);
             this.buttonReName.TabIndex = 3;
@@ -76,7 +77,7 @@
             // 
             // buttonDownLoad
             // 
-            this.buttonDownLoad.Location = new System.Drawing.Point(713, 242);
+            this.buttonDownLoad.Location = new System.Drawing.Point(713, 147);
             this.buttonDownLoad.Name = "buttonDownLoad";
             this.buttonDownLoad.Size = new System.Drawing.Size(75, 23);
             this.buttonDownLoad.TabIndex = 4;
@@ -94,7 +95,7 @@
             // 
             // buttonSinglePage
             // 
-            this.buttonSinglePage.Location = new System.Drawing.Point(713, 300);
+            this.buttonSinglePage.Location = new System.Drawing.Point(713, 188);
             this.buttonSinglePage.Name = "buttonSinglePage";
             this.buttonSinglePage.Size = new System.Drawing.Size(75, 23);
             this.buttonSinglePage.TabIndex = 6;
@@ -104,7 +105,7 @@
             // 
             // buttonInfo
             // 
-            this.buttonInfo.Location = new System.Drawing.Point(713, 349);
+            this.buttonInfo.Location = new System.Drawing.Point(713, 240);
             this.buttonInfo.Name = "buttonInfo";
             this.buttonInfo.Size = new System.Drawing.Size(75, 23);
             this.buttonInfo.TabIndex = 7;
@@ -114,7 +115,7 @@
             // 
             // buttonBanner
             // 
-            this.buttonBanner.Location = new System.Drawing.Point(713, 397);
+            this.buttonBanner.Location = new System.Drawing.Point(713, 289);
             this.buttonBanner.Name = "buttonBanner";
             this.buttonBanner.Size = new System.Drawing.Size(75, 23);
             this.buttonBanner.TabIndex = 8;
@@ -124,7 +125,7 @@
             // 
             // buttonAll
             // 
-            this.buttonAll.Location = new System.Drawing.Point(713, 122);
+            this.buttonAll.Location = new System.Drawing.Point(713, 66);
             this.buttonAll.Name = "buttonAll";
             this.buttonAll.Size = new System.Drawing.Size(75, 23);
             this.buttonAll.TabIndex = 9;
@@ -132,11 +133,22 @@
             this.buttonAll.UseVisualStyleBackColor = true;
             this.buttonAll.Click += new System.EventHandler(this.buttonAll_Click);
             // 
+            // buttonNoCookie
+            // 
+            this.buttonNoCookie.Location = new System.Drawing.Point(713, 341);
+            this.buttonNoCookie.Name = "buttonNoCookie";
+            this.buttonNoCookie.Size = new System.Drawing.Size(75, 44);
+            this.buttonNoCookie.TabIndex = 10;
+            this.buttonNoCookie.Text = "无cookie下载";
+            this.buttonNoCookie.UseVisualStyleBackColor = true;
+            this.buttonNoCookie.Click += new System.EventHandler(this.buttonNoCookie_Click);
+            // 
             // Form1
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
-            this.ClientSize = new System.Drawing.Size(800, 450);
+            this.ClientSize = new System.Drawing.Size(800, 465);
+            this.Controls.Add(this.buttonNoCookie);
             this.Controls.Add(this.buttonAll);
             this.Controls.Add(this.buttonBanner);
             this.Controls.Add(this.buttonInfo);
@@ -167,6 +179,7 @@
         private System.Windows.Forms.Button buttonInfo;
         private System.Windows.Forms.Button buttonBanner;
         private System.Windows.Forms.Button buttonAll;
+        private System.Windows.Forms.Button buttonNoCookie;
     }
 }
 
