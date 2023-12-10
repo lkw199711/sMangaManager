@@ -19,11 +19,11 @@ using static System.Windows.Forms.VisualStyles.VisualStyleElement;
 
 namespace sMangaManager
 {
-    public partial class Form1 : Form
+    public partial class FormIndex : Form
     {
         Lkw lkw = new Lkw();
         List<website.ChapterItem> chapters;
-        public Form1()
+        public FormIndex()
         {
             InitializeComponent();
         }

@@ -1,6 +1,6 @@
 ﻿namespace sMangaManager
 {
-    partial class Form1
+    partial class FormIndex
     {
         /// <summary>
         /// 必需的设计器变量。
@@ -256,7 +256,7 @@
             this.groupBoxBtn.TabStop = false;
             this.groupBoxBtn.Enter += new System.EventHandler(this.groupBoxBtn_Enter);
             // 
-            // Form1
+            // FormIndex
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
@@ -266,8 +266,8 @@
             this.Controls.Add(this.groupBoxURL);
             this.Controls.Add(this.groupBoxReName);
             this.Controls.Add(this.groupBoxHtmlCode);
-            this.Name = "Form1";
-            this.Text = "FormIndex";
+            this.Name = "FormIndex";
+            this.Text = "韩漫元数据下载器(顶通)";
             this.Load += new System.EventHandler(this.Form1_Load);
             this.groupBoxHtmlCode.ResumeLayout(false);
             this.groupBoxReName.ResumeLayout(false);
