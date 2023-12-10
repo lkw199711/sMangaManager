@@ -21,7 +21,7 @@ namespace website
         /// </summary>
         /// <param name="url"></param>
         /// <param name="formIndex"></param>
-        public TopToon(string url, string cookie = "", bool downloadSwitch = true, string html = "")
+        public TopToon(string saveRoute, string url, string cookie = "", bool downloadSwitch = true, string html = "")
         {
             //获取链接
             this.url = url;
@@ -37,7 +37,7 @@ namespace website
 
             this.downloadSwitch = downloadSwitch;
             //执行初始化方法
-            this.init();
+            this.init(saveRoute);
         }
 
         protected override ChapterItem get_chapter_images(string info)
@@ -266,6 +266,8 @@ namespace website
                 string description = characterDescriptionList[i].Value;
                 string image = imageList[i].Value;
 
+                name = this.format_file_name(name);
+
                 list.Add(new Character(name, description));
 
                 string saveName = this.route + this.name + "-smanga-info\\" + name + this.get_image_suffix(image);
@@ -295,20 +297,6 @@ namespace website
             delete(smangaPath + "\\temp");
         }
 
-        /// <summary>
-        /// 删除文件或目录
-        /// </summary>
-        /// <param name="fileName">文件路径</param>
-        public void delete(string fileName)
-        {
-            // 如果是目录,调用文件夹方法
-            if (Directory.Exists(fileName)) Directory.Delete(fileName, true);
-
-            // 如果是文件,调用文件方法
-            if (File.Exists(fileName)) File.Delete(fileName);
-
-        }
-
         public void set_info()
         {
             // 下载角色信息
@@ -326,5 +314,10 @@ namespace website
             File.WriteAllText(this.infoRoute + "info.json", json);
             File.WriteAllText(this.infoRoute + "info.html", html);
         }
+    }
+
+    class TopToonParams
+    {
+        public TopToonParams() { }
     }
 }

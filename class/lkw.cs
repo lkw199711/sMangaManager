@@ -1041,7 +1041,7 @@ namespace lkw
             List<Bitmap> a = new List<Bitmap>();
             int width = pic.Width;
             int height = pic.Height;
-            int start = -1, end = 1, num = 0, t = 0;
+            int start = -1, end = 1, t = 0;
 
             while (end != width - 1)
             {

@@ -48,9 +48,9 @@ namespace website
         /// 初始化实例
         /// </summary>
         /// <param name="url">漫画首页的链接</param>
-        protected void init()
+        protected void init(string saveRoute)
         {
-            string route = global.downloadRoute + "\\" + this.webSiteName + "\\";
+            string route = saveRoute + "\\" + this.webSiteName + "\\";
             this.route = route;
             //设置网站标识
             global.website = this.webSiteMark;
@@ -212,6 +212,7 @@ namespace website
                     download_image_by_http(images[i], saveName);
                 }catch (Exception e)
                 {
+                    Console.WriteLine(e.ToString());
                     continue;
                 }
                 
@@ -379,7 +380,7 @@ namespace website
         protected string format_file_name(string str)
         {
             //替换关键字
-            string[] key = { "\n", "<", ">", "\\", "/", "|", ":", "*", "?", " " };
+            string[] key = { "\n","\t", "<", ">", "\\", "/", "|", ":", "*", "?", " " };
 
             //循环替换
             for (int i = 0, l = key.Length; i < l; i++)
