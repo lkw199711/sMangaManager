@@ -164,10 +164,11 @@ namespace sMangaManager
 
                 foreach (string fileName in Directory.GetFileSystemEntries(dir))
                 {
+                    if (!File.Exists(fileName)) continue;
 
                     list.Add(fileName);
 
-
+                    lkw.log(fileName);
 
                     // 替换文件名
                     //replace(fileName, oldStr, newStr);
@@ -179,7 +180,7 @@ namespace sMangaManager
                     lkw.msbox("章节数量不一致,不能重命名");
                     Console.WriteLine(list.Count.ToString());
                     Console.WriteLine(chapters.Count.ToString());
-
+                    return;
                 }
 
 
