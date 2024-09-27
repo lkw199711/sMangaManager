@@ -30,7 +30,7 @@ namespace sMangaManager
 
         private void Form1_Load(object sender, EventArgs e)
         {
-            textBoxReNameFolder.Text = "D:\\8other\\01manga\\顶通\\download\\test";
+            textBoxReNameFolder.Text = "F:\\01manga\\tmp\\test\\test";
 
             // 重命名功能提示
             labelReNameTip.Text += "程序获取到的文件顺序是错位的,目前本程序无补位功能.请提前补位并保证文件顺序正常,如您无法理解,请勿使用重命名功能.";
@@ -177,9 +177,10 @@ namespace sMangaManager
                 if (list.Count != chapters.Count)
                 {
                     lkw.msbox("章节数量不一致,不能重命名");
+                    
                     Console.WriteLine(list.Count.ToString());
                     Console.WriteLine(chapters.Count.ToString());
-
+                    return;
                 }
 
 
