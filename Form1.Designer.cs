@@ -48,6 +48,7 @@
             this.groupBoxURL = new System.Windows.Forms.GroupBox();
             this.groupBoxSvaeRoute = new System.Windows.Forms.GroupBox();
             this.groupBoxBtn = new System.Windows.Forms.GroupBox();
+            this.labelVersion = new System.Windows.Forms.Label();
             this.groupBoxHtmlCode.SuspendLayout();
             this.groupBoxReName.SuspendLayout();
             this.groupBoxURL.SuspendLayout();
@@ -256,11 +257,21 @@
             this.groupBoxBtn.TabStop = false;
             this.groupBoxBtn.Enter += new System.EventHandler(this.groupBoxBtn_Enter);
             // 
+            // labelVersion
+            // 
+            this.labelVersion.AutoSize = true;
+            this.labelVersion.Location = new System.Drawing.Point(586, 595);
+            this.labelVersion.Name = "labelVersion";
+            this.labelVersion.Size = new System.Drawing.Size(23, 12);
+            this.labelVersion.TabIndex = 24;
+            this.labelVersion.Text = "1.0";
+            // 
             // FormIndex
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 12F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(800, 616);
+            this.Controls.Add(this.labelVersion);
             this.Controls.Add(this.groupBoxBtn);
             this.Controls.Add(this.groupBoxSvaeRoute);
             this.Controls.Add(this.groupBoxURL);
@@ -304,6 +315,7 @@
         private System.Windows.Forms.GroupBox groupBoxURL;
         private System.Windows.Forms.GroupBox groupBoxSvaeRoute;
         private System.Windows.Forms.GroupBox groupBoxBtn;
+        private System.Windows.Forms.Label labelVersion;
     }
 }
 

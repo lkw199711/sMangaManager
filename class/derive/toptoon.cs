@@ -310,7 +310,7 @@ namespace website
             }
 
 
-            string json = JsonConvert.SerializeObject(info);
+            string json = JsonConvert.SerializeObject(info, Formatting.Indented);
             File.WriteAllText(this.infoRoute + "info.json", json);
             File.WriteAllText(this.infoRoute + "info.html", html);
         }

@@ -16,6 +16,7 @@ using System.Windows.Forms;
 using website;
 using Newtonsoft.Json;
 using static System.Windows.Forms.VisualStyles.VisualStyleElement;
+using System.Reflection;
 
 namespace sMangaManager
 {
@@ -37,6 +38,17 @@ namespace sMangaManager
 
             // 下载路径
             textBoxSaveRoute.Text = global.downloadRoute;
+
+            // 获取当前程序集
+            Assembly assembly = Assembly.GetExecutingAssembly();
+
+            // 获取程序集版本号
+            Version version = assembly.GetName().Version;
+
+            // 输出版本号信息
+            Console.WriteLine("程序集版本号：" + version.ToString());
+
+            labelVersion.Text = "版本号：" + version.ToString();
         }
 
         /// <summary>
@@ -109,34 +121,7 @@ namespace sMangaManager
         /// <param name="e"></param>
         private void buttonTest_Click(object sender, EventArgs e)
         {
-            string route = get_save_route() + "single-page\\";
-
-            string url = textBoxUrl.Text; string html = richTextBoxHtml.Text;
-
-            TopToon toptoon = new TopToon(url: url, cookie: global.cookie, downloadSwitch: false, html: html, saveRoute: get_save_route());
-            chapters = toptoon.chapters;
-
-            List<string> list = new List<string>();
-            string dir = textBoxReNameFolder.Text;
-
-            lkw.NewWork(() =>
-            {
-                // 非文件夹
-                if (!Directory.Exists(dir)) return;
-
-                foreach (string fileName in Directory.GetFileSystemEntries(dir))
-                {
-
-                    list.Add(fileName);
-                    lkw.log(fileName);
-                }
-
-
-                chapters.ForEach((website.ChapterItem item) =>
-                {
-                    lkw.log(item.subName);
-                });
-            });
+            
         }
 
         /// <summary>
@@ -164,10 +149,11 @@ namespace sMangaManager
 
                 foreach (string fileName in Directory.GetFileSystemEntries(dir))
                 {
+                    if (!File.Exists(fileName)) continue;
 
                     list.Add(fileName);
 
-
+                    lkw.log(fileName);
 
                     // 替换文件名
                     //replace(fileName, oldStr, newStr);
