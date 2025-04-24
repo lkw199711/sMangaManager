@@ -1,22 +1,20 @@
-﻿using lkw;
-using manga_reptile;
+﻿using globalData;
+using lkw;
+using Microsoft.VisualBasic;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.ComponentModel;
-using System.Data;
-using System.Drawing;
 using System.IO;
-using System.Linq;
 using System.Net;
-using System.Security.Policy;
+using System.Net.Http;
+using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 using System.Windows.Forms;
 using website;
-using Newtonsoft.Json;
-using static System.Windows.Forms.VisualStyles.VisualStyleElement;
-using System.Reflection;
+using static website.Bangumi;
 
 namespace sMangaManager
 {
@@ -29,15 +27,51 @@ namespace sMangaManager
             InitializeComponent();
         }
 
+        public void config_load()
+        {
+            // 读取 JSON 文件
+            string json = File.ReadAllText("./config.json");
+
+            // 反序列化 JSON 到对象
+            Config globalJson = JsonConvert.DeserializeObject<Config>(json);
+            global.config = globalJson;
+            comboBoxRoute.DataSource = global.config.routers;
+        }
+
+        public void config_update()
+        {
+            string filePath = "config.json"; // 当前路径下的 config.json 文件
+            string json = JsonConvert.SerializeObject(global.config, Formatting.Indented);
+            File.WriteAllText(filePath, json);
+        }
+
+        public class Config
+        {
+
+            public BindingList<string> routers { get; set; }
+
+            public Config()
+            {
+
+            }
+        }
         private void Form1_Load(object sender, EventArgs e)
         {
-            textBoxReNameFolder.Text = "D:\\8other\\01manga\\顶通\\download\\test";
+            string filePath = "config.json"; // 当前路径下的 config.json 文件
 
-            // 重命名功能提示
-            labelReNameTip.Text += "程序获取到的文件顺序是错位的,目前本程序无补位功能.请提前补位并保证文件顺序正常,如您无法理解,请勿使用重命名功能.";
+            // 判断文件是否存在
+            if (!File.Exists(filePath))
+            {
+                Config config = new Config();
+                config.routers = new BindingList<string>();
 
-            // 下载路径
-            textBoxSaveRoute.Text = global.downloadRoute;
+                string json = JsonConvert.SerializeObject(config, Formatting.Indented);
+                // 创建文件并写入空的 JSON 对象
+                File.WriteAllText(filePath, json);
+            }
+
+            // 读取配置信息
+            config_load();
 
             // 获取当前程序集
             Assembly assembly = Assembly.GetExecutingAssembly();
@@ -49,6 +83,9 @@ namespace sMangaManager
             Console.WriteLine("程序集版本号：" + version.ToString());
 
             labelVersion.Text = "版本号：" + version.ToString();
+
+            textBoxUrl.TextChanged += (sender1, e1) => global.url = textBoxUrl.Text;
+            richTextBoxHtml.TextChanged += (s2, e2) => global.html = richTextBoxHtml.Text;
         }
 
         /// <summary>
@@ -121,8 +158,41 @@ namespace sMangaManager
         /// <param name="e"></param>
         private void buttonTest_Click(object sender, EventArgs e)
         {
-            
+            string html = get_html_by_request("https://manga.bilibili.com/detail/mc34355", "");
+            Console.WriteLine(html);
         }
+
+        public async Task bilibili_test()
+        {
+            
+            string subjectUrl = $"https://manga.bilibili.com/twirp/comic.v1.Comic/ComicDetail";
+            using (HttpClient client = new HttpClient())
+            {
+                // 添加自定义的请求头
+                client.DefaultRequestHeaders.Add("Origin", "https://manga.bilibili.com");
+                client.DefaultRequestHeaders.Add("Referer", "https://manga.bilibili.com");
+                client.DefaultRequestHeaders.Add("User-Agent", "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/134.0.0.0 Safari/537.36");
+                // 设置请求内容
+                string comic_id = "34355";
+                var jsonData = $"{{\"comic_id\":{comic_id}}}";
+                var content = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                try
+                {
+                    HttpResponseMessage response = await client.PostAsync(subjectUrl, content);
+                    response.EnsureSuccessStatusCode(); // 确保请求成功
+
+                    string jsonResponse = await response.Content.ReadAsStringAsync();
+                    var json = JsonConvert.DeserializeObject<dynamic>(jsonResponse);
+
+                    Console.WriteLine(json);
+                }
+                catch (HttpRequestException e)
+                {
+                    Console.WriteLine("请求失败: " + e.Message);
+                }
+            }
+        }
+
 
         /// <summary>
         /// 重命名按钮
@@ -131,62 +201,39 @@ namespace sMangaManager
         /// <param name="e"></param>
         private void buttonReName_Click(object sender, EventArgs e)
         {
+            string dir = "";
             string url = textBoxUrl.Text;
 
             string html = richTextBoxHtml.Text;
 
-            TopToon toptoon = new TopToon(url: url, cookie: global.cookie, downloadSwitch: false, html: html, saveRoute: get_save_route());
-
-            string dir = textBoxReNameFolder.Text;
+            TopToon toptoon = new TopToon(url: url, cookie: global.cookie, downloadSwitch: false, html: html, saveRoute: comboBoxRoute.Text);
 
             List<string> list = new List<string>();
+
             chapters = toptoon.chapters;
 
-            lkw.NewWork(() =>
+            BindingList<FileInfo> fileList = new BindingList<FileInfo>();
+            BindingList<string> chapterList = new BindingList<string>();
+
+            foreach (string fileName in Directory.GetFileSystemEntries(dir))
             {
-                // 非文件夹
-                if (!Directory.Exists(dir)) return;
+                // 目标为文件夹与压缩包 发现为图片则剔除
+                if (is_img(fileName)) continue;
 
-                foreach (string fileName in Directory.GetFileSystemEntries(dir))
-                {
-                    if (!File.Exists(fileName)) continue;
+                fileList.Add(new FileInfo(fileName));
 
-                    list.Add(fileName);
+                lkw.log(fileName);
 
-                    lkw.log(fileName);
+                // 替换文件名
+                //replace(fileName, oldStr, newStr);
+            }
 
-                    // 替换文件名
-                    //replace(fileName, oldStr, newStr);
-                }
-
-
-                if (list.Count != chapters.Count)
-                {
-                    lkw.msbox("章节数量不一致,不能重命名");
-                    Console.WriteLine(list.Count.ToString());
-                    Console.WriteLine(chapters.Count.ToString());
-                    return;
-                }
-
-
-                for (int i = 0; i < chapters.Count; i++)
-                {
-                    //获取文件扩展名
-                    string suffix = Path.GetExtension(list[i]);
-
-                    string newName = dir + "\\" + chapters[i].name + suffix;
-
-                    try //路径含有非法字符 跳过
-                    {
-                        File.Move(list[i], newName);
-                    }catch {
-                        lkw.log(newName+ "路径含有非法字符 跳过 请手动重命名");
-                        continue;
-                    }
-                    
-                }
+            chapters.ForEach(item =>
+            {
+                chapterList.Add(item.name);
             });
-            
+            FormRename form2 = new FormRename(fileList, chapterList, toptoon.name, "");
+            form2.Show();
         }
 
         /// <summary>
@@ -203,7 +250,7 @@ namespace sMangaManager
 
             _ = lkw.NewWork(() =>
             {
-                TopToon toptoon = new TopToon(url: url, cookie: cookie, html: html, saveRoute:get_save_route());
+                TopToon toptoon = new TopToon(url: url, cookie: cookie, html: html, saveRoute: comboBoxRoute.Text);
                 toptoon.download_chapter_poster();
                 toptoon.download_chapter_poster();
                 //new TopToon(url, cookie, true, html);
@@ -227,11 +274,13 @@ namespace sMangaManager
             {
                 for (int i = 0, l = imageList.Count; i < l; i++)
                 {
-                    lkw.log("https:" + imageList[i].Value);
-                    download_image_by_http("https:" + imageList[i].Value, get_save_route() + "single-page\\" + i.ToString().PadLeft(5, '0') + ".jpg");
+                    string imgUrl = "https:" + imageList[i].Value;
+                    imgUrl = imgUrl.Replace("amp;", "");
+                    lkw.log(imgUrl);
+                    download_image_by_http(imgUrl, ".\\single-page\\" + i.ToString().PadLeft(5, '0') + ".jpg");
 
                 }
-            }); 
+            });
         }
 
         /// <summary>
@@ -261,6 +310,19 @@ namespace sMangaManager
                 FileStream fs = new FileStream(tempFile, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
                 // 设置参数
                 HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+                // 添加请求头
+                request.Headers.Add("sec-ch-ua", "\"Not(A:Brand\";v=\"99\", \"Google Chrome\";v=\"133\", \"Chromium\";v=\"133\"");
+                request.Headers.Add("sec-ch-ua-mobile", "?0");
+                request.Headers.Add("sec-ch-ua-platform", "\"Windows\"");
+                request.Headers.Add("upgrade-insecure-requests", "1");
+                request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36";
+                request.Accept = "image/webp,image/apng,image/*,*/*;q=0.8";
+                request.Headers.Add("Accept-Language", "en-US,en;q=0.9");
+
+                string domain = "https://www.toptoon.net/";
+                CookieContainer cookies = ConvertStringToCookieContainer(global.cookie, domain);
+                request.CookieContainer = cookies;
+
                 //发送请求并获取相应回应数据
                 HttpWebResponse response = request.GetResponse() as HttpWebResponse;
                 //直到request.GetResponse()程序才开始向目标网页发送Post请求
@@ -288,6 +350,28 @@ namespace sMangaManager
             }
         }
 
+        public static CookieContainer ConvertStringToCookieContainer(string cookieString, string url)
+        {
+            CookieContainer cookieContainer = new CookieContainer();
+            Uri uri = new Uri(url);
+
+            // 分割 cookie 字符串
+            string[] cookies = cookieString.Split(';');
+            foreach (string cookie in cookies)
+            {
+                string[] cookieParts = cookie.Split('=');
+                if (cookieParts.Length == 2)
+                {
+                    string cookieName = cookieParts[0].Trim();
+                    string cookieValue = cookieParts[1].Trim();
+                    cookieContainer.Add(uri, new Cookie(cookieName, cookieValue));
+                }
+            }
+
+            return cookieContainer;
+        }
+
+
         /// <summary>
         /// 单页下载按钮
         /// </summary>
@@ -304,7 +388,7 @@ namespace sMangaManager
 
             lkw.NewWork(() =>
             {
-                TopToon toptoon = new TopToon(url: url, cookie: global.cookie, html: html, saveRoute: get_save_route());
+                TopToon toptoon = new TopToon(url: url, cookie: global.cookie, html: html, saveRoute: comboBoxRoute.Text);
                 toptoon.set_info();
             });
         }
@@ -317,10 +401,10 @@ namespace sMangaManager
         private void buttonBanner_Click(object sender, EventArgs e)
         {
             string url = textBoxUrl.Text; string html = richTextBoxHtml.Text;
-            
+
             lkw.NewWork(() =>
             {
-                TopToon toptoon = new TopToon(url: url, cookie: global.cookie,html: html, saveRoute: get_save_route());
+                TopToon toptoon = new TopToon(url: url, cookie: global.cookie, html: html, saveRoute: comboBoxRoute.Text);
                 toptoon.download_manga_info_poster();
             });
         }
@@ -334,23 +418,50 @@ namespace sMangaManager
         {
             string url = textBoxUrl.Text;
             string html = richTextBoxHtml.Text;
-
-            string cookie = "language=tw; viewModeSaving=1; userKeyToken=15d27a24e1a22987d24aee4c99c1917e_1689925853; service_key=e7cdac5be1e5cd7b6041b87bfb616665; _gcl_au=1.1.2074426609.1689925857; __lt__cid=75a9432a-e104-4e09-8a16-dbab6d5b9064; _ga=GA1.1.1319261843.1689925859; adultStatus=1; notOpenConfirmAdult=1; saveId=lkw199711%40163.com; freeTimeGiveInfo=%7B%22LD3%22%3A1689926119%7D; isLoginUsed=1; net_session=elFmR3g5UWRsYm1ZZlIrOHlNNk4wRWdHTTd5b1dDeHA0MDRVblNXK0VmV1N1RjFhWXJOZStqUlIxcnU5bTA5VUZkVDgvS1lwUlNFdldKM3JBTkFvZlNWUEkzQkU2cUxPbndmcVFuUFB2QmV5bGJXRnlMOHlpcjNtOUMyWDZaZWRCOWVvbmZOdXMzUkpDQ3V5MERnbHhvYmhORmEyVmVJZ0F3NEtGbVN4SkMzbFRLVWU0Q2d1VVB2aEs3bXprNy9MYy9sRE42VU9Wd2FJRzR6UHExZUozUnR5WDhVeCtETlJ1U1NvMG53OFZneEVwSmNuRUxydlQ2K3FoU09XbTNtdTZ3T1gvYTRYUnFHdTBMTXprMGUxbW9GWFk5RlVEaUtNRFhPNDRTTlFEc2g4VmoraGJlazBtV3JwM3BEZEFsREFHdFN4VXlhMGtzcnZOR284cW4rdVJnbGI0b1Fabi9kL2V1Rk12N3JmNGUxNTlmRHpEREQ0QVhwcm9vdVlrVzFCMktwTXV3S0t5SlRtYzBqdlpCZGpGZzZJclFvcmQ0SnlqLzBJVjhEa0pZbEJYNzlYQkxnYk9PUWhSZldzMXpiM3p5aHFSMzRjamVCOHFEazliYWtsQ3g5N3V4L0wvVEhYS3VQclJ5eFViQVpaZkFJZGlLOTl1SW1CeTA4alBBamI3Tmw4VjhOZzZteWtqa0JROWgwdUdWdnc5VGVGakxlWWNWOHhKMFdaYVZQYjJVR05PZG5MQ1B6eTZaV2NZeHlGf0118085649aad90f5226e57852d563f581163bc; userGender=1; notOpenGiftNotice=1; existsBannerTop=1; userKey=6BC96BA0A3A0CD6122EC2C2319EEBB921D8A4763360662553ECACCED9DF9C108; comicEpListSort=asc; userRecentTop10ListToLS=1; viewNonstop=1; notOpenPhoneCertNotice=1; notOpenAttendancePopup=1; hotTimeGiveInfo=%7B%22hotTimeSet%22%3A1689933579%7D; notOpenPopupNotice=1; __lt__sid=c93d9a72-7fc17385; epListAccessPath=%2Fsearch; spush_nowUrl=https%253A%252F%252Fwww.toptoon.net%252Fcomic%252FepList%252F80643; _ga_CZ8J0XSEDJ=GS1.1.1689933471.3.1.1689933617.31.0.0";
-
-            // 存储路径到全局
-            global.downloadRoute = textBoxSaveRoute.Text;
+            string saveRoute = comboBoxRoute.Text;
 
             _ = lkw.NewWork(() =>
             {
-                TopToon toptoon = new TopToon(url: url, cookie: cookie,html: html, saveRoute: get_save_route());
-                toptoon.download_chapter_poster();
-                toptoon.download_chapter_poster();
-                toptoon.download_manga_info_poster();
-                toptoon.set_info();
+                //顶通
+                if (global.url.Contains("toptoon"))
+                {
+                    TopToon toptoon = new TopToon(url: url, cookie: global.cookie, html: html, saveRoute: saveRoute);
+                    toptoon.download_chapter_poster();
+                    toptoon.download_chapter_poster();
+                    toptoon.download_manga_info_poster();
+                    toptoon.set_info();
+                }
+                // 玩漫
+                if (global.url.Contains("toomics"))
+                {
+                    Toomics toomics = new Toomics(url: url, cookie: global.cookie, html: html, saveRoute: saveRoute);
+                    toomics.download_chapter_poster();
+                    toomics.download_chapter_poster();
+                    toomics.download_manga_info_poster();
+                    toomics.set_info();
+                }
+                //bangumi
+                if (global.url.Contains("bangumi"))
+                {
+                    Bangumi bangumi;
+                    bangumi = new Bangumi(url: global.url, cookie: global.cookie, html: global.html, saveRoute: @"D:\tmp");
+                    bangumi.download_manga_info_poster();
+                }
+                //E站
+                if (global.url.Contains("hentai"))
+                {
+                    Ehentai ehentai;
+                    ehentai = new Ehentai(url: global.url, cookie: global.cookie, html: global.html, saveRoute: @"D:\tmp");
+                    ehentai.download_manga_info_poster();
+                    ehentai.set_info();
+                    //ehental.download_manga_info_poster();
+                }
+
+
 
                 lkw.log("任务执行完毕");
                 lkw.msbox("任务执行完毕");
-                
+
             });
         }
 
@@ -361,7 +472,7 @@ namespace sMangaManager
 
             _ = lkw.NewWork(() =>
             {
-                TopToon toptoon = new TopToon(url: url, html: html, saveRoute:get_save_route());
+                TopToon toptoon = new TopToon(url: url, html: html, saveRoute: comboBoxRoute.Text);
                 toptoon.download_chapter_poster();
                 toptoon.download_chapter_poster();
                 toptoon.download_manga_info_poster();
@@ -387,16 +498,100 @@ namespace sMangaManager
         {
 
         }
-        
-        /// <summary>
-        /// 获取存储路径
-        /// </summary>
-        /// <returns></returns>
-        public string get_save_route()
-        {
-            string route = textBoxSaveRoute.Text;
 
-            return route;
+        private void labelVersion_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        public bool is_img(string filePath)
+        {
+            string pattern = @"(.bmp|.jpg|.jpeg|.png|.tif|.gif|.pcx|.tga|.exif|.fpx|.svg|.psd|.cdr|.pcd|.dxf|.ufo|.eps|.ai|.raw|.WMF|.webp|.avif|.apng)$";
+
+            return Regex.IsMatch(filePath, pattern, RegexOptions.IgnoreCase);
+        }
+
+        private void buttonAddRoute_Click(object sender, EventArgs e)
+        {
+            // VB的输入对话框 在点击取消时返回的空字符串
+            string routerInput = Interaction.InputBox("请输入新路径:", "添加路径", "");
+            // 输入空或点击了取消
+            if (string.IsNullOrEmpty(routerInput))
+            {
+                return;
+            }
+            if (!Directory.Exists(routerInput))
+            {
+                MessageBox.Show("路径读取错误");
+                return;
+            }
+            global.config.routers.Add(routerInput);
+            config_update();
+        }
+
+        private void comboBoxRoute_SelectedIndexChanged(object sender, EventArgs e)
+        {
+            // 清空面板
+            panelMangaList.Controls.Clear();
+
+            string mediaPath = comboBoxRoute.Text;
+
+
+            foreach (string mangaPath in Directory.GetFileSystemEntries(mediaPath))
+            {
+                // 目前只刮削章节漫画,因此只接受目录 剔除文件
+                if (!Directory.Exists(mangaPath)) continue;
+                if (mangaPath.Contains("smanga-info")) continue;
+                if (mangaPath.Contains("smangaManager")) continue;
+
+                string mangaName = Path.GetFileName(mangaPath);
+                string mangaCover = "";
+                string describe = "";
+                Meta meta = null;
+                bool scraped = false;
+                List<string> tags = new List<string>();
+                if (Directory.Exists(mangaPath + "-smanga-info"))
+                {
+                    string infoFile = Path.Combine(mangaPath + "-smanga-info", "meta.json");
+                    if (!File.Exists(infoFile)) continue;
+
+                    mangaCover = Path.Combine(mangaPath + "-smanga-info", "cover.jpg");
+                    // 读取元数据 JSON 文件
+                    string json = File.ReadAllText(infoFile);
+                    meta = JsonConvert.DeserializeObject<Meta>(json);
+                    describe = meta.describe;
+                    tags = meta.tags;
+                    if (meta.tags == null)
+                    {
+                        tags = new List<string>();
+                    }
+                    scraped = true;
+                }
+                MangaListItem mangaListItem = new MangaListItem(
+                    this,
+                    tags,
+                    mangaName,
+                    mangaPath,
+                    mediaPath,
+                    //imagePath: "A:\\02manga\\download\\2025\\直播主的流量密碼-smanga-info\\cover.webp",
+                    imagePath: mangaCover,
+                    describe,
+                    scraped
+                    );
+
+                panelMangaList.Controls.Add(mangaListItem);
+            }
+
+        }
+
+        class Meta
+        {
+            public string title { get; set; }
+            public string author { get; set; }
+            public string describe { get; set; }
+            public List<string> tags { get; set; }
+            public string publishDate { get; set; }
+
         }
     }
 }

@@ -7,8 +7,9 @@ using System.Security.Policy;
 using System.Text;
 using System.Text.RegularExpressions;
 using System.Threading.Tasks;
+using globalData;
 
-namespace manga_reptile
+namespace sMangaManager
 {
     abstract class analysis
     {

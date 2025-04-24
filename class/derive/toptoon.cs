@@ -1,13 +1,8 @@
-﻿using manga_reptile;
-using Newtonsoft.Json;
+﻿using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
-using System.Linq;
-using System.Net;
-using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
 
 namespace website
 {
@@ -57,14 +52,15 @@ namespace website
 
             //获取章节名称
             string chapterName;
-            if (name == null) {
+            if (name == null)
+            {
                 chapterName = subName;
             }
             else
             {
                 chapterName = name + " " + subName;
             }
-            
+
 
             // 如有重名则后缀加1
             this.chapters.ForEach((ChapterItem item) =>
@@ -77,7 +73,7 @@ namespace website
             });
 
             Console.WriteLine(chapterName);
-            
+
 
             //截取图片链接部分
             string imageBox = info;
@@ -97,7 +93,7 @@ namespace website
 
             /*
              生成章节实体类 (章节名,链接,图片扩展名,图片链接list)*/
-            return new ChapterItem(chapterName, chapterName, suffix, list);
+            return new ChapterItem(chapterName, chapterName, pubDate, suffix, list);
         }
 
         /// <summary>
@@ -219,7 +215,7 @@ namespace website
             for (int i = 0, l = imageList.Count; i < l; i++)
             {
                 string image = imageList[i].Value;
-                string saveName = this.route + this.name + "-smanga-info\\banner" + i.ToString().PadLeft(2, '0') + this.get_image_suffix(image);
+                string saveName = this.infoRoute + "\\banner" + i.ToString().PadLeft(2, '0') + this.get_image_suffix(image);
 
                 if (System.IO.File.Exists(saveName))
                 {
@@ -239,7 +235,7 @@ namespace website
             for (int i = 0, l = imageList.Count; i < l; i++)
             {
                 string image = imageList[i].Value;
-                string saveName = this.route + this.name + "-smanga-info\\thumbnail" + i.ToString().PadLeft(2, '0') + this.get_image_suffix(image);
+                string saveName = this.infoRoute + "\\thumbnail" + i.ToString().PadLeft(2, '0') + this.get_image_suffix(image);
 
                 if (System.IO.File.Exists(saveName))
                 {
@@ -263,14 +259,18 @@ namespace website
             for (int i = 0, l = characterList.Count; i < l; i++)
             {
                 string name = characterList[i].Value;
-                string description = characterDescriptionList[i].Value;
+                string description = "";
+                if (characterDescriptionList.Count > 0)
+                {
+                    description = characterDescriptionList[i].Value;
+                }
                 string image = imageList[i].Value;
 
                 name = this.format_file_name(name);
 
                 list.Add(new Character(name, description));
 
-                string saveName = this.route + this.name + "-smanga-info\\" + name + this.get_image_suffix(image);
+                string saveName = this.infoRoute + "\\" + name + this.get_image_suffix(image);
 
                 if (System.IO.File.Exists(saveName))
                 {
@@ -286,15 +286,13 @@ namespace website
 
         public void download_manga_info_poster()
         {
-            string smangaPath = this.route + this.name + "-smanga-info";
-
             this.download_banner(this.html);
             this.download_thumbnail(this.html);
             this.download_character(this.html);
             //下载漫画封面
-            download_image_by_http(this.poster, this.infoRoute + "cover"+ this.get_image_suffix(this.poster));
+            download_image_by_http(this.poster, this.infoRoute + "cover" + this.get_image_suffix(this.poster));
 
-            delete(smangaPath + "\\temp");
+            delete(this.infoRoute + "\\temp");
         }
 
         public void set_info()
@@ -311,7 +309,7 @@ namespace website
 
 
             string json = JsonConvert.SerializeObject(info, Formatting.Indented);
-            File.WriteAllText(this.infoRoute + "info.json", json);
+            File.WriteAllText(this.infoRoute + "meta.json", json);
             File.WriteAllText(this.infoRoute + "info.html", html);
         }
     }

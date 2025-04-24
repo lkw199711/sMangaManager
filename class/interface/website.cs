@@ -1,14 +1,12 @@
-﻿using manga_reptile;
+﻿using globalData;
 using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Net;
-using System.Reflection;
 using System.Text;
 using System.Text.RegularExpressions;
-using System.Threading.Tasks;
-using System.Xml.Linq;
+using System.Windows.Forms;
 
 namespace website
 {
@@ -16,10 +14,11 @@ namespace website
     {
 
         //漫画名称
-        protected string name;
+        public string name;
         protected string poster;
         protected string route;
-        protected string infoRoute;
+        public string infoRoute;
+        public bool useMobile = false;
         //漫画主页链接
         protected string url;
         //漫画网站用户标识
@@ -33,8 +32,8 @@ namespace website
         //漫画网站域名
         protected string webSiteDomain;
         //漫画下载路径
-        protected string downloadRoute;
-        protected int numberSuffix=1;
+        public string downloadRoute;
+        protected int numberSuffix = 1;
         //章节合集
         public List<ChapterItem> chapters = new List<ChapterItem>();
 
@@ -50,7 +49,7 @@ namespace website
         /// <param name="url">漫画首页的链接</param>
         protected void init(string saveRoute)
         {
-            string route = saveRoute + "\\" + this.webSiteName + "\\";
+            string route = saveRoute;
             this.route = route;
             //设置网站标识
             global.website = this.webSiteMark;
@@ -63,19 +62,30 @@ namespace website
             this.name = this.get_manga_name(this.html);
             this.poster = this.get_manga_poster(this.html);
             //构建下载路径
-            this.downloadRoute = route + this.name + "\\";
-            this.infoRoute = this.route + this.name + "-smanga-info\\";
+            this.downloadRoute = Path.Combine(route, this.name);
+            this.infoRoute = this.downloadRoute + "-smanga-info\\";
+
+            if (!Directory.Exists(this.downloadRoute)) Directory.CreateDirectory(this.downloadRoute);
+            if (!Directory.Exists(this.infoRoute)) Directory.CreateDirectory(this.infoRoute);
 
             //获取所有页码页面
             this.chapterPages = this.get_chapter_pages(this.html);
             //获取所有章节链接
             this.chapterPages.ForEach((string i) => { this.chapterInfos = chapterInfos.Union(this.get_chapter_info(i)).ToList(); });
             //获取章节图片
-            this.chapterInfos.ForEach((string i) => { 
-                this.chapters.Add(this.get_chapter_images(i)); });
+            this.chapterInfos.ForEach((string i) =>
+            {
+                this.chapters.Add(this.get_chapter_images(i));
+            });
         }
 
-        public void download_chapter_poster() {
+        protected void load_base_data()
+        {
+
+        }
+
+        public void download_chapter_poster()
+        {
             //下载章节图片
             this.chapters.ForEach((ChapterItem i) => { this.download_chapter_images(i); });
 
@@ -187,7 +197,7 @@ namespace website
             //图片下载链接
             List<string> images = chapter.images;
             //下载路径
-            string route = this.downloadRoute + chapter.name;
+            string route = Path.Combine(this.downloadRoute, chapter.name);
             //后缀名
             string suffix = chapter.suffix;
 
@@ -210,12 +220,13 @@ namespace website
                 {
                     //下载图片
                     download_image_by_http(images[i], saveName);
-                }catch (Exception e)
+                }
+                catch (Exception e)
                 {
                     Console.WriteLine(e.ToString());
                     continue;
                 }
-                
+
             }
 
             //校验图片数量
@@ -253,6 +264,11 @@ namespace website
                 //伪造浏览器数据，避免被防采集程序过滤
                 //wReq.UserAgent = "Mozilla/4.0 (compatible; MSIE 6.0; Windows NT 5.0; .NET CLR 1.1.4322; .NET CLR 2.0.50215; CrazyCoder.cn;www.aligong.com)";
                 wReq.UserAgent = "Mozilla/5.0 (Linux; Android 9; Mi Note 3) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/80.0.3987.132 Mobile Safari/537.36";
+                if (useMobile)
+                {
+                    wReq.UserAgent = "Mozilla/5.0 (iPhone; CPU iPhone OS 16_6 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/16.6 Mobile/15E148 Safari/604.1";
+                }
+                
                 wReq.Accept = "*/*";
                 wReq.KeepAlive = true;
                 wReq.Headers.Add("cookie", cookie);
@@ -323,17 +339,21 @@ namespace website
             string tempPath = System.IO.Path.GetDirectoryName(path) + @"\temp";
             System.IO.Directory.CreateDirectory(tempPath);  //创建临时文件目录
             string tempFile = tempPath + @"\" + System.IO.Path.GetFileName(path) + ".temp"; //临时文件
-            
+
             if (System.IO.File.Exists(tempFile))
             {
                 System.IO.File.Delete(tempFile);    //存在则删除
             }
-            
+
             try
             {
                 FileStream fs = new FileStream(tempFile, FileMode.Append, FileAccess.Write, FileShare.ReadWrite);
                 // 设置参数
                 HttpWebRequest request = WebRequest.Create(url) as HttpWebRequest;
+                // 添加请求头
+                request.UserAgent = "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/91.0.4472.124 Safari/537.36";
+                request.Accept = "image/webp,image/apng,image/*,*/*;q=0.8";
+                request.Headers.Add("Accept-Language", "en-US,en;q=0.9");
                 //发送请求并获取相应回应数据
                 HttpWebResponse response = request.GetResponse() as HttpWebResponse;
                 //直到request.GetResponse()程序才开始向目标网页发送Post请求
@@ -368,7 +388,15 @@ namespace website
         /// <returns></returns>
         protected string get_image_suffix(string fileName)
         {
-            return Regex.Match(fileName, "\\.(jpg|jpeg|png|bmp|gif|webp)", RegexOptions.IgnoreCase).Value;
+            Match match = Regex.Match(fileName, "\\.(jpg|jpeg|png|bmp|gif|webp)", RegexOptions.IgnoreCase);
+            if (match.Success)
+            {
+                return match.Value;
+            }
+            else
+            {
+                return ".jpg";
+            }
         }
 
         /// <summary>
@@ -380,7 +408,7 @@ namespace website
         protected string format_file_name(string str)
         {
             //替换关键字
-            string[] key = { "\n","\t", "<", ">", "\\", "/", "|", ":", "*", "?", " " };
+            string[] key = { "\n", "\r", "\t", "<", ">", "\\", "/", "|", ":", "*", "?", " " };
 
             //循环替换
             for (int i = 0, l = key.Length; i < l; i++)
@@ -400,17 +428,19 @@ namespace website
     /// url 章节链接
     /// imageList 章节中的图片列表 记录图片的下载链接
     /// </summary>
-    class ChapterItem
+    public class ChapterItem
     {
         public string name;
         public string subName;
+        public string pubDate;
         public string suffix;
         public List<string> images;
 
-        public ChapterItem(string name, string subName, string suffix, List<string> images)
+        public ChapterItem(string name, string subName,string pubDate, string suffix, List<string> images)
         {
             this.name = name;
             this.subName = subName;
+            this.pubDate = pubDate;
             this.suffix = suffix;
             this.images = images;
         }
@@ -425,8 +455,9 @@ namespace website
         public List<string> tags;
         public string publishDate;
         public List<Character> character;
+        public string subName;
 
-        public MangaInfo(string title, string author, string star, string describe, List<string> tags, string publishDate)
+        public MangaInfo(string title, string author, string star, string describe, List<string> tags, string publishDate, string subName = "")
         {
             this.title = title;
             this.author = author;
@@ -434,6 +465,7 @@ namespace website
             this.describe = describe;
             this.tags = tags;
             this.publishDate = publishDate;
+            this.subName = subName;
         }
     }
     public class Character
