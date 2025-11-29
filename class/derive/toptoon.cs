@@ -302,6 +302,7 @@ namespace website
 
             info.character = download_character(this.html);
             info.chapters = this.chapters;
+
             if (!File.Exists(this.infoRoute))
             {
                 Directory.CreateDirectory(this.infoRoute);
