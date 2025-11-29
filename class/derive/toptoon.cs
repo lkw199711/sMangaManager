@@ -301,7 +301,7 @@ namespace website
             MangaInfo info = get_manga_info(this.html);
 
             info.character = download_character(this.html);
-
+            info.chapters = this.chapters;
             if (!File.Exists(this.infoRoute))
             {
                 Directory.CreateDirectory(this.infoRoute);
