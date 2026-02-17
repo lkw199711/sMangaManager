@@ -455,8 +455,8 @@ namespace website
         public List<string> tags;
         public string publishDate;
         public List<Character> character;
-        public string subName;
         public List<ChapterItem> chapters;
+        public string subName;
 
         public MangaInfo(string title, string author, string star, string describe, List<string> tags, string publishDate, string subName = "")
         {
