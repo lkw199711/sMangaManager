@@ -63,7 +63,7 @@ namespace website
             this.poster = this.get_manga_poster(this.html);
             //构建下载路径
             this.downloadRoute = Path.Combine(route, this.name);
-            this.infoRoute = this.downloadRoute + "-smanga-info\\";
+            this.infoRoute = Path.Combine(route, this.name, ".smanga");
 
             if (!Directory.Exists(this.downloadRoute)) Directory.CreateDirectory(this.downloadRoute);
             if (!Directory.Exists(this.infoRoute)) Directory.CreateDirectory(this.infoRoute);
