@@ -208,8 +208,9 @@ namespace website
 
 
             string json = JsonConvert.SerializeObject(info, Formatting.Indented);
-            File.WriteAllText(this.infoRoute + "meta.json", json);
-            File.WriteAllText(this.infoRoute + "info.html", html);
+            
+            File.WriteAllText(Path.Combine(this.infoRoute, "meta.json"), json);
+            File.WriteAllText(Path.Combine(this.infoRoute, "info.html"), html);
         }
 
         public class ToomicesMangaInfo

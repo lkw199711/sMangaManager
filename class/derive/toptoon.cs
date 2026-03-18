@@ -290,7 +290,7 @@ namespace website
             this.download_thumbnail(this.html);
             this.download_character(this.html);
             //下载漫画封面
-            download_image_by_http(this.poster, this.infoRoute + "cover" + this.get_image_suffix(this.poster));
+            download_image_by_http(this.poster, this.infoRoute + "/cover" + this.get_image_suffix(this.poster));
 
             delete(this.infoRoute + "\\temp");
         }
@@ -310,8 +310,8 @@ namespace website
 
 
             string json = JsonConvert.SerializeObject(info, Formatting.Indented);
-            File.WriteAllText(this.infoRoute + "meta.json", json);
-            File.WriteAllText(this.infoRoute + "info.html", html);
+            File.WriteAllText(this.infoRoute + "/meta.json", json);
+            File.WriteAllText(this.infoRoute + "/info.html", html);
         }
     }
 
